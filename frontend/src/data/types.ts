@@ -17,6 +17,10 @@ export type ModuleMeta = {
   statuses: string[]
   actions: string[]
   actionTargets: Record<string, string>
+  // 每个动作允许的来源状态：登记了就按顺序流转，越级拒收；没登记的不加限制。
+  actionSources?: Record<string, string[]>
+  // 终态状态：进入终态后不再算待处理；缺省只把最后一个状态当终态。
+  finalStatuses?: string[]
   metrics: string[]
 }
 
@@ -35,4 +39,11 @@ export type ActionResult = {
 export type OverviewResult = {
   cards: { label: string; value: number }[]
   modules: { name: string; created: number; pending: number; abnormal: number }[]
+}
+
+// 变更控制详情：申请本体 + 最新一版风险评估 + 联动出来的供应商审计待办。
+export type ChangeControlDetail = {
+  row: EntryRow
+  assessment: EntryRow | null
+  supplierTodo: EntryRow | null
 }

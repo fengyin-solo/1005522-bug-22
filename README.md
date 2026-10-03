@@ -67,5 +67,8 @@ npm run build
   `frontend/src/api/local-service.ts`。
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
+- 变更控制的判定台账（类别档位、风险阈值、状态流转顺序）集中在
+  `frontend/src/data/change-rules.ts`：变更类别一律按现行阈值从风险评估评分判定，
+  列表、详情、导出与落库共用这一份口径；没按标准填的记录不允许保存。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
 - 想回到初始数据：清掉浏览器里 `pharma-cleanroom:entries` 这一项，或调用 `resetModule(模块)`。

@@ -1,3 +1,4 @@
+import { CHANGE_ACTION_SOURCES, CHANGE_FINAL_STATUSES } from './change-rules'
 import type { ModuleMeta } from './types'
 
 // 模块元数据由仓库生成时写入：字段、状态、动作、流转目标都在这里，页面不再各自写一遍。
@@ -55,6 +56,8 @@ export const MODULES: ModuleMeta[] = [
     statuses: ["待评估", "评估中", "已批准", "已拒绝"],
     actions: ["提交评估", "批准变更", "退回变更"],
     actionTargets: {"提交评估": "评估中", "批准变更": "已批准", "退回变更": "已拒绝"},
+    actionSources: CHANGE_ACTION_SOURCES,
+    finalStatuses: CHANGE_FINAL_STATUSES,
     metrics: ["待评估变更", "评估中变更", "本月批准数"],
   },
   {
