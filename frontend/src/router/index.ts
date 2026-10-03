@@ -6,6 +6,7 @@ const Cleanroom = () => import('@/views/cleanroom/index.vue')
 const Materialrelease = () => import('@/views/materialrelease/index.vue')
 const Deviation = () => import('@/views/deviation/index.vue')
 const Changecontrol = () => import('@/views/changecontrol/index.vue')
+const ChangeDetail = () => import('@/views/changecontrol/detail.vue')
 const Cleanvalidate = () => import('@/views/cleanvalidate/index.vue')
 const Sterilize = () => import('@/views/sterilize/index.vue')
 const Mediafill = () => import('@/views/mediafill/index.vue')
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/materialrelease', name: 'materialrelease', component: Materialrelease },
     { path: '/deviation', name: 'deviation', component: Deviation },
     { path: '/changecontrol', name: 'changecontrol', component: Changecontrol },
+    { path: '/changecontrol/:id', name: 'changecontrol-detail', component: ChangeDetail },
     { path: '/cleanvalidate', name: 'cleanvalidate', component: Cleanvalidate },
     { path: '/sterilize', name: 'sterilize', component: Sterilize },
     { path: '/mediafill', name: 'mediafill', component: Mediafill },

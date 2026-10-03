@@ -1,4 +1,5 @@
 import { SEED_ROWS } from './seed'
+import { normalizeStore } from './normalize-store'
 import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
@@ -9,21 +10,24 @@ function clone<T>(value: T): T {
 }
 
 function readStorage(): Record<string, EntryRow[]> {
-  const fallback = clone(SEED_ROWS)
+  const seed = clone(SEED_ROWS)
   if (typeof window === 'undefined' || !window.localStorage) {
-    return fallback
+    return normalizeStore(seed)
   }
   const raw = window.localStorage.getItem(STORAGE_KEY)
   if (!raw) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback))
-    return fallback
+    const seeded = normalizeStore(seed)
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+    return seeded
   }
   try {
     const parsed = JSON.parse(raw) as Record<string, EntryRow[]>
-    return { ...fallback, ...parsed }
+    // 无论首开还是读旧档，都按现行台账重判一遍再用，页面标注与落库结论保持同一份。
+    return normalizeStore({ ...seed, ...parsed })
   } catch {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback))
-    return fallback
+    const seeded = normalizeStore(clone(SEED_ROWS))
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
+    return seeded
   }
 }
 
@@ -41,17 +45,25 @@ export function listRows(key: string): EntryRow[] {
 }
 
 export function saveRows(key: string, rows: EntryRow[]): void {
-  const next = { ...allRows(), [key]: rows }
+  // 每次写库都过一遍台账：变更重判 + 供应商待办同步在写库时即完成，不存在「写库是老结论」。
+  const next = normalizeStore({ ...allRows(), [key]: rows })
+  saveAll(next)
+}
+
+export function resetRows(key: string): EntryRow[] {
+  const normalized = normalizeStore({ [key]: clone(SEED_ROWS[key] ?? []) })
+  const rows = normalized[key]
+  // 变更重置会影响供应商待办，整份重存保证两边一致。
+  const all = { ...allRows(), [key]: rows }
+  saveAll(normalizeStore(all))
+  return rows
+}
+
+function saveAll(next: Record<string, EntryRow[]>): void {
   cache = next
   if (typeof window !== 'undefined' && window.localStorage) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
   }
-}
-
-export function resetRows(key: string): EntryRow[] {
-  const rows = clone(SEED_ROWS[key] ?? [])
-  saveRows(key, rows)
-  return rows
 }
 
 export function storageKey(): string {

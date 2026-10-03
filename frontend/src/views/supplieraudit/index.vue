@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>供应商审计管理</h2>
-        <p class="page-desc">维护供应商审计记录，围绕审计编号、供应商名称、物料类别、审计方式做登记、筛选与状态流转。</p>
+        <p class="page-desc">维护供应商审计记录，围绕审计编号、供应商名称、物料类别、审计方式做登记、筛选与状态流转；变更批准会同步生成待审计待办。</p>
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记供应商审计记录</button>
@@ -42,7 +42,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="String(row.id)">
+        <tr v-for="row in rows" :key="String(row.id)" :class="{ 'row-synced': String(row.来源变更 ?? '').trim() }">
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
@@ -82,16 +82,22 @@ import {
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('supplieraudit')
-const columns = ["审计编号", "供应商名称", "物料类别", "审计方式", "缺陷项数", "审计结论", "整改期限", "审计状态"]
+const columns = ["审计编号", "供应商名称", "物料类别", "审计方式", "缺陷项数", "审计结论", "整改期限", "来源变更", "审计状态"]
 const actions = ["提交审计", "判定通过", "要求整改"]
 const statuses = ["待审计", "审计中", "已通过", "需整改"]
-const stats = [{"label": "待审计供应商", "value": 0}, {"label": "审计中供应商", "value": 0}, {"label": "需整改供应商数", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+
+const stats = computed(() => [
+  { label: "待审计供应商", value: rows.value.filter((row) => String(row.status) === '待审计').length },
+  { label: "审计中供应商", value: rows.value.filter((row) => String(row.status) === '审计中').length },
+  { label: "需整改供应商数", value: rows.value.filter((row) => String(row.status) === '需整改').length },
+])
+
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -135,3 +141,7 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.row-synced { background: #eef7ff; }
+</style>
